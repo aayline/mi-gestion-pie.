@@ -65,7 +65,7 @@ details.card summary{cursor:pointer;font-weight:700}.card .btn{margin:10px 8px 0
 <h1>Mi Gestión PIE · Valentín Letelier</h1>
 <p class="sub">Tus planillas se procesan en este dispositivo. Guarda con clave y genera respaldos cifrados.</p>
 <div id="start">
-  <div class="card hid" id="sv0"><p>Hay datos guardados en este dispositivo.</p><input id="pw0" type="password" placeholder="Tu clave" aria-label="Tu clave" autocomplete="current-password"><button class="btn" id="op">Abrir datos guardados</button><button class="btn alt" id="rm0">Borrar datos guardados</button></div>
+  <div class="card" id="sv0"><strong>Recuperar mi trabajo</strong><p id="savedStatus">Comprobando datos guardados…</p><input id="pw0" type="password" placeholder="Tu clave" aria-label="Tu clave" autocomplete="current-password"><button class="btn" id="op">Abrir datos guardados</button><button class="btn alt hid" id="rm0">Borrar datos guardados</button><p class="mt" id="openMsg" role="status"></p></div>
   <div class="card">
     <p>Carga tus planillas de notas y asistencia, la nómina PIE y la reevaluación 2026 (.xlsx). Puedes elegir varios archivos a la vez.</p>
     <label class="btn" tabindex="0" id="lb">Elegir planillas<input id="fi" type="file" accept=".xlsx" multiple class="hid"></label>
@@ -75,7 +75,7 @@ details.card summary{cursor:pointer;font-weight:700}.card .btn{margin:10px 8px 0
 </div>
 <div id="app" class="hid">
   <div class="tabs"><button class="chip" id="t1">Estudiantes</button><button class="chip" id="t2">Seguimiento</button><button class="chip" id="t3">Reevaluación 2026</button><button class="chip" id="t4">Resumen</button><label class="chip" tabindex="0" id="lb2">Agregar planilla<input id="f2" type="file" accept=".xlsx" multiple class="hid"></label></div>
-  <p class="ct" id="ld" role="status"></p>
+  <p class="ct" id="ld" role="status"></p><p class="card hid" id="dirtyMsg" role="status" style="border-color:#b67d26">⚠️ Tienes cambios sin guardar. Abre «Guardar en este dispositivo» y presiona «Guardar» antes de salir.</p>
   <details class="card" id="sv"><summary>Guardar en este dispositivo</summary><p class="mt">Se guarda cifrado con una clave que tú eliges, solo en este navegador. Si la olvidas, tendrás que cargar las planillas de nuevo.</p><input id="pw" type="password" placeholder="Elige una clave" aria-label="Elige una clave" autocomplete="new-password"><button class="btn" id="gd">Guardar</button><button class="btn alt hid" id="rm">Borrar datos guardados</button><button class="btn alt" id="backupBtn">Descargar respaldo cifrado</button><p class="mt" id="sm" role="status"></p><p class="note">Después de editar, presiona Guardar para conservar los cambios cifrados. El respaldo descargado permite recuperar datos si cambias de dispositivo.</p></details>
   <div id="v1">
   <div class="bar">
@@ -104,7 +104,7 @@ const pc=(a,d)=>typeof a==='number'&&typeof d==='number'&&d>0?a/d:null;
 const rows=ws=>{const r=XLSX.utils.decode_range(ws['!ref']||'A1'),a=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null}),p=new Array(r.s.c).fill(null);return[...Array(r.s.r).fill([]),...a.map(x=>[...p,...x])]};
 const t0=x=>x==null?'':String(x).trim();
 const fd=v=>{if(v==null||v==='')return'';if(typeof v==='number'&&v>20000&&v<80000){const d=new Date(Math.round((v-25569)*864e5));return String(d.getUTCDate()).padStart(2,'0')+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+d.getUTCFullYear()}return t0(v)};
-let S=[],NS=null,NM=null,NE=null,NR=null,TB=1,st={q:'',lv:'',lt:'',md:'',pf:''};
+let S=[],NS=null,NM=null,NE=null,NR=null,TB=1,dirty=false,st={q:'',lv:'',lt:'',md:'',pf:''};
 const SG={TL:'Trastorno del lenguaje',TLE:'Trastorno de lenguaje expresivo',TLM:'Trastorno de lenguaje mixto',TEA:'Trastorno del espectro autista',TDA:'Trastorno de déficit atencional',TDAH:'Trastorno de déficit atencional con hiperactividad',DIL:'Discapacidad intelectual leve',DIM:'Discapacidad intelectual moderada',FIL:'Funcionamiento intelectual limítrofe',DEA:'Dificultades específicas del aprendizaje'};
 const MD={1:[['','Todos'],['t','Transitorios'],['p','Permanentes']],2:[['','Todos'],['n','Con alerta de notas'],['a','Asistencia bajo 85 %']],3:[['','Todos'],['e','Posible egreso']]};
 const cur=c=>String(c||'').replace(/\s/g,'').replace('º','°');
@@ -244,18 +244,21 @@ function renderEdit(i){
 }
 
 const KS='pie-datos-v1',has=()=>{try{return!!localStorage.getItem(KS)}catch(e){return false}},msg=t=>$('sm').textContent=t;
+function markDirty(){dirty=true;$('dirtyMsg').classList.remove('hid')}
+function clearDirty(){dirty=false;$('dirtyMsg').classList.add('hid')}
+function refreshSaved(){const saved=has();$('savedStatus').textContent=saved?'Hay datos cifrados guardados en este navegador. Ingresa tu contraseña para recuperarlos.':'No se encontraron datos guardados en este navegador. Si tienes un respaldo .json, puedes restaurarlo abajo. Si guardaste antes, revisa que uses el mismo Safari y no la navegación privada.';$('op').disabled=!saved;$('pw0').disabled=!saved;$('rm0').classList.toggle('hid',!saved);$('rm').classList.toggle('hid',!saved)}
 const b64=u=>{u=new Uint8Array(u);let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
 const ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const dk=async(p,salt)=>{const m=await crypto.subtle.importKey('raw',new TextEncoder().encode(p),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])};
-function sv(){$('rm').classList.toggle('hid',!has())}
+function sv(){refreshSaved()}
 async function guardar(){const p=$('pw').value;if(p.length<4)return msg('Usa una clave de al menos 4 caracteres.');
   try{const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),k=await dk(p,salt);
     const d=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,new TextEncoder().encode(JSON.stringify({NS,NM,NE,NR,S})));
-    localStorage.setItem(KS,JSON.stringify({s:b64(salt),i:b64(iv),d:b64(d)}));$('pw').value='';sv();msg('Guardado en este dispositivo.')}
+    localStorage.setItem(KS,JSON.stringify({s:b64(salt),i:b64(iv),d:b64(d)}));if(!has())throw Error('No persistió');$('pw').value='';clearDirty();sv();msg('Guardado cifrado confirmado en este navegador. Para recuperarlo, al volver a entrar usa «Abrir datos guardados».')}
   catch(e){msg('No pude guardar en este dispositivo.')}}
 async function abrir(){try{const o=JSON.parse(localStorage.getItem(KS)),k=await dk($('pw0').value,ub(o.s));
-    const d=await crypto.subtle.decrypt({name:'AES-GCM',iv:ub(o.i)},k,ub(o.d));({NS,NM,NE,NR,S}=JSON.parse(new TextDecoder().decode(d)));if(S&&S.length){calc(S);start();$('ld').textContent='Datos restaurados de este dispositivo.'}else build()}
-  catch(e){$('er').textContent='Clave incorrecta o datos dañados.'}}
+    const d=await crypto.subtle.decrypt({name:'AES-GCM',iv:ub(o.i)},k,ub(o.d));({NS,NM,NE,NR,S}=JSON.parse(new TextDecoder().decode(d)));if(S&&S.length){calc(S);start();clearDirty();$('ld').textContent='Datos restaurados de este dispositivo.'}else {build();clearDirty()}}
+  catch(e){$('openMsg').textContent='No se pudieron abrir los datos. Comprueba la contraseña.'}}
 
 $('backupBtn').onclick=()=>{
  const stored=localStorage.getItem(KS);
@@ -273,10 +276,10 @@ $('restoreBtn').onclick=async()=>{
   const data=JSON.parse(new TextDecoder().decode(plain));
   if(!Array.isArray(data.S))throw Error('Respaldo incompatible.');
   if(!confirm('¿Reemplazar los datos locales con este respaldo?'))return;
-  localStorage.setItem(KS,JSON.stringify(obj));({NS,NM,NE,NR,S}=data);calc(S);start();$('ld').textContent='Respaldo restaurado.';
+  localStorage.setItem(KS,JSON.stringify(obj));({NS,NM,NE,NR,S}=data);calc(S);start();clearDirty();$('ld').textContent='Respaldo restaurado.';
  }catch(e){$('er').textContent='No se pudo restaurar. Revisa el archivo y la contraseña.'}
 };
-function borrar(){try{localStorage.removeItem(KS)}catch(e){}$('sv0').classList.add('hid');sv();msg('Datos borrados de este dispositivo.')}
+function borrar(){try{localStorage.removeItem(KS)}catch(e){}sv();msg('Datos borrados de este dispositivo.')}
 const close=()=>$('ov').classList.remove('on');
 async function files(l){const em=t=>{$('er').textContent=t;$('ld').textContent=t};em('');
   try{for(const f of l){const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});
@@ -284,11 +287,11 @@ async function files(l){const em=t=>{$('er').textContent=t;$('ld').textContent=t
     else if(wb.Sheets['Transitorios']||wb.Sheets['Permanentes']||wb.Sheets['ESTUDIANTES 2026'])nomina(wb);
     else if(wb.SheetNames.some(n=>norm(n).startsWith('reevaluacion')))reev(wb);
     else throw 'No reconocí «'+f.name+'». Necesito la planilla de notas, la nómina PIE o la reevaluación.';}
-    if(NS||NM||NE||NR)build();}catch(x){em(typeof x==='string'?x:'No pude leer ese archivo. Revisa que sea una planilla .xlsx.')}}
+    if(NS||NM||NE||NR){build();markDirty();}}catch(x){em(typeof x==='string'?x:'No pude leer ese archivo. Revisa que sea una planilla .xlsx.')}}
 $('fi').onchange=e=>files([...e.target.files]);$('f2').onchange=e=>files([...e.target.files]);
 ['lb','lb2'].forEach(k=>$(k).onkeydown=e=>{if(e.key==='Enter')$(k==='lb'?'fi':'f2').click()});
 [1,2,3,4].forEach(i=>$('t'+i).onclick=()=>tab(i));
-$('demo').onclick=()=>{const g=(k,a)=>({k,g:a});
+$('demo').onclick=()=>{if(has()&&!confirm('Hay un guardado en este navegador. Los ejemplos no lo borrarán, pero reemplazarán lo que ves ahora. ¿Continuar?'))return;const g=(k,a)=>({k,g:a});
   S=[['Valentina Araya','1°A','TL','Ana Pérez','T',[g('NL',[4.0,3.5,5.0,4.2]),g('L',[6.0,6.5,7.0,6.2])],[[20,17],[21,19],[18,17]],1,{t:'Integral',ob:'Psicometría',co:'FONO - PSICOPEDAGOGICO - FAMILIA',eg:''}],
      ['Matías Fuentes','1°B','TDAH','Luis Díaz','T',[g('L',[6.5,6.0,7.0,6.8]),g('LD',[7.0,6.5,6.8,7.0])],[[20,19],[21,20]],0,{t:'FUR y avance',ob:'',co:'',eg:''}],
      ['Sofía Navarro','2°B','TEA','Ana Pérez','P',[g('ML',[5.0,4.5,5.2,4.8]),g('NL',[3.0,4.0,3.5,5.0])],[[20,9],[21,12],[18,10]],1,{t:'Integral',ob:'Posible alta',co:'FUR EGRESO',eg:'posible egreso'}],
@@ -302,7 +305,8 @@ $('lv').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;st.lv=b.datas
 $('ls').onclick=e=>{const b=e.target.closest('.st');if(b)open(+b.dataset.i)};
 $('ov').onclick=e=>{if(e.target===$('ov')||e.target.id==='cl')close()};
 $('gd').onclick=guardar;$('op').onclick=abrir;$('rm').onclick=borrar;$('rm0').onclick=borrar;
-if(has())$('sv0').classList.remove('hid');
+refreshSaved();
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
 document.onkeydown=e=>{if(e.key==='Escape')close()};
 </script>
 </body>
