@@ -76,7 +76,7 @@ details.card summary{cursor:pointer;font-weight:700}.card .btn{margin:10px 8px 0
 <div id="app" class="hid">
   <div class="tabs"><button class="chip" id="t1">Estudiantes</button><button class="chip" id="t2">Seguimiento</button><button class="chip" id="t3">Reevaluación 2026</button><button class="chip" id="t4">Resumen</button><label class="chip" tabindex="0" id="lb2">Agregar planilla<input id="f2" type="file" accept=".xlsx" multiple class="hid"></label></div>
   <p class="ct" id="ld" role="status"></p><p class="card hid" id="dirtyMsg" role="status" style="border-color:#b67d26">⚠️ Tienes cambios sin guardar. Abre «Guardar en este dispositivo» y presiona «Guardar» antes de salir.</p>
-  <details class="card" id="sv"><summary>Guardar en este dispositivo</summary><p class="mt">Se guarda cifrado con una clave que tú eliges, solo en este navegador. Si la olvidas, tendrás que cargar las planillas de nuevo.</p><input id="pw" type="password" placeholder="Elige una clave" aria-label="Elige una clave" autocomplete="new-password"><button class="btn" id="gd">Guardar</button><button class="btn alt hid" id="rm">Borrar datos guardados</button><button class="btn alt" id="backupBtn">Descargar respaldo cifrado</button><p class="mt" id="sm" role="status"></p><p class="note">Después de editar, presiona Guardar para conservar los cambios cifrados. El respaldo descargado permite recuperar datos si cambias de dispositivo.</p></details>
+  <details class="card" id="sv"><summary>Guardar en este dispositivo</summary><p class="mt">Se guarda cifrado con una clave que tú eliges, solo en este navegador. Si la olvidas, tendrás que cargar las planillas de nuevo.</p><input id="pw" type="password" placeholder="Elige una clave" aria-label="Elige una clave" autocomplete="new-password"><button class="btn" id="gd">Guardar</button><button class="btn alt hid" id="rm">Borrar datos guardados</button><button class="btn alt" id="backupBtn">Descargar respaldo cifrado</button><button class="btn alt" id="lockBtn">Cerrar sesión</button><p class="mt" id="sm" role="status"></p><p class="note">Después de editar, presiona Guardar para conservar los cambios cifrados. El respaldo descargado permite recuperar datos si cambias de dispositivo.</p></details>
   <div id="v1">
   <div class="bar">
     <input id="q" type="search" placeholder="Buscar estudiante" aria-label="Buscar estudiante" autocomplete="off">
@@ -162,7 +162,7 @@ function start(){
   st={q:'',lv:'',lt:'',md:'',pf:''};['q','lt'].forEach(k=>$(k).value='');
   const lv=[...new Set(S.map(s=>parseInt(s.c)))].sort((a,b)=>a-b);
   $('lv').innerHTML=['Todos',...lv].map((l,i)=>`<button class="chip" data-l="${i?l:''}" aria-pressed="${!i}">${i?l+'°':l}</button>`).join('');
-  $('pf').innerHTML='<option value="">Todos los docentes</option>'+[...new Set(S.map(s=>s.rp).filter(Boolean))].sort().map(p=>`<option>${p}</option>`).join('');
+  $('pf').innerHTML='<option value="">Todos los docentes</option>'+[...new Set(S.map(s=>s.rp).filter(Boolean))].sort().map(p=>`<option>${safeText(p)}</option>`).join('');
   $('nt').textContent='Una nota fuera de 1,0 a 7,0 se marca con ⚠ para que la revises en la planilla. La asistencia se calcula con los días asistidos sobre los días del mes.';
   tab(1);}
 function tab(n){TB=n;$('v1').classList.toggle('hid',n===4);$('v2').classList.toggle('hid',n!==4);
@@ -170,12 +170,12 @@ function tab(n){TB=n;$('v1').classList.toggle('hid',n===4);$('v2').classList.tog
   if(n===4)return summary();
   st.md='';$('md').innerHTML=MD[n].map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');$('nt').classList.toggle('hid',n!==2);draw();}
 const bt=(s,x)=>`<li><button class="st" data-i="${S.indexOf(s)}"><span class="cu">${s.c}</span>${x}</button></li>`;
-const ln=a=>{a=a.filter(Boolean);return a.length?`<span class="dx">${a.join(' · ')}</span>`:''};
+const ln=a=>{a=a.filter(Boolean);return a.length?`<span class="dx">${a.map(safeText).join(' · ')}</span>`:''};
 const tpn=s=>s.tp?(s.tp==='P'?'Permanente':'Transitorio'):'';
 const ret=s=>s.ret?'<span class="bd n">Retirado/a</span>':'';
-function row1(s){return bt(s,`<span class="nm">${s.n}</span>`+ln([s.rut&&'RUT '+s.rut,s.fn&&'Nac. '+s.fn])+ln([s.dx||'Sin diagnóstico',tpn(s),s.rp&&'Docente: '+s.rp])+ln([s.fe&&'Diagnóstico emitido '+s.fe,s.vm&&'Valoración médica '+s.vm])+`<span>${ret(s)}</span>`)}
-function row2(s){return bt(s,`<span class="nm">${s.n}</span>`+ln([s.dx||'Sin diagnóstico',s.rp&&'Docente: '+s.rp])+ln(['Lenguaje '+f1(s.pl),'Matemática '+f1(s.pm),'Asistencia '+(s.ap==null?'–':Math.round(s.ap*100)+' %')])+`<span>${ret(s)}${s.an?'<span class="bd">Alerta de notas</span>':''}${s.aa?'<span class="bd">Asistencia baja</span>':''}</span>`)}
-function row3(s){const v=s.rv,I=v.t==='Integral';return bt(s,`<span class="nm">${s.n}</span>`+ln([s.dx||'Sin diagnóstico',tpn(s),s.rp&&'Docente: '+s.rp])+ln([v.ob&&'Observación: '+v.ob])+(I&&v.co?ln(['Corresponde: '+v.co.replace(/\s*-\s*/g,' · ')]):'')+`<span>${ret(s)}${eg(s)?'<span class="bd n">Posible egreso</span>':''}</span>`)}
+function row1(s){return bt(s,`<span class="nm">${safeText(s.n)}</span>`+ln([s.rut&&'RUT '+s.rut,s.fn&&'Nac. '+s.fn])+ln([s.dx||'Sin diagnóstico',tpn(s),s.rp&&'Docente: '+s.rp])+ln([s.fe&&'Diagnóstico emitido '+s.fe,s.vm&&'Valoración médica '+s.vm])+`<span>${ret(s)}</span>`)}
+function row2(s){return bt(s,`<span class="nm">${safeText(s.n)}</span>`+ln([s.dx||'Sin diagnóstico',s.rp&&'Docente: '+s.rp])+ln(['Lenguaje '+f1(s.pl),'Matemática '+f1(s.pm),'Asistencia '+(s.ap==null?'–':Math.round(s.ap*100)+' %')])+`<span>${ret(s)}${s.an?'<span class="bd">Alerta de notas</span>':''}${s.aa?'<span class="bd">Asistencia baja</span>':''}</span>`)}
+function row3(s){const v=s.rv,I=v.t==='Integral';return bt(s,`<span class="nm">${safeText(s.n)}</span>`+ln([s.dx||'Sin diagnóstico',tpn(s),s.rp&&'Docente: '+s.rp])+ln([v.ob&&'Observación: '+v.ob])+(I&&v.co?ln(['Corresponde: '+v.co.replace(/\s*-\s*/g,' · ')]):'')+`<span>${ret(s)}${eg(s)?'<span class="bd n">Posible egreso</span>':''}</span>`)}
 function draw(){
   let r=S.filter(s=>(!st.q||norm(s.n).includes(norm(st.q)))&&(!st.lv||parseInt(s.c)==st.lv)&&(!st.lt||s.c.endsWith(st.lt))&&(!st.pf||s.rp===st.pf));
   if(TB===1)r=r.filter(s=>(st.md!=='t'||s.tp==='T')&&(st.md!=='p'||s.tp==='P'));
@@ -186,15 +186,15 @@ function draw(){
   if(TB===3){const g=(t,tt)=>{const a=r.filter(s=>s.rv.t===t);return`<li class="gh">${tt} · ${a.length}</li>`+a.map(row3).join('')};h=r.length?g('Integral','Reevaluación integral')+g('FUR y avance','En proceso (FUR y avance)'):'';}
   else h=r.map(TB===1?row1:row2).join('');
   $('ls').innerHTML=h||'<li class="empty">Ningún estudiante coincide. Cambia o quita un filtro.</li>';}
-const gc=v=>ok(v)?`<td class="${v<4?'lo':''}">${f1(v)}</td>`:`<td title="${v==null?'':'Revisar en la planilla'}">${v==null?'–':typeof v==='number'?'⚠':v}</td>`;
+const gc=v=>ok(v)?`<td class="${v<4?'lo':''}">${f1(v)}</td>`:`<td title="${v==null?'':'Revisar en la planilla'}">${v==null?'–':typeof v==='number'?'⚠':safeText(v)}</td>`;
 function notas(x,t){if(![x.L,x.M].some(y=>y.g.some(v=>v!=null)||y.k))return'';
-  const row=(n,y)=>{const a=avg(y.g);return`<tr><td>${n}</td><td>${y.k||'–'}</td>${y.g.map(gc).join('')}<td class="${a!==null&&a<4?'lo':''}">${f1(a)}</td></tr>`};
+  const row=(n,y)=>{const a=avg(y.g);return`<tr><td>${n}</td><td>${safeText(y.k||'–')}</td>${y.g.map(gc).join('')}<td class="${a!==null&&a<4?'lo':''}">${f1(a)}</td></tr>`};
   const sb=['Inglés','Ciencias','Historia'].filter((_,i)=>x.sub[i]);
-  return`<h3>${t}${x.al?' · <span class="lo">con alerta</span>':''}</h3><table><tr><th></th><th>Nivel</th><th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>Prom.</th></tr>${row('Lenguaje',x.L)}${row('Matemática',x.M)}</table>${sb.length?`<p class="mt">Notas bajas en: ${sb.join(', ')}</p>`:''}${x.ob&&typeof x.ob==='string'?`<p class="mt">${x.ob}</p>`:''}`;}
-const rvh=s=>{if(!s.rv)return'';const v=s.rv,I=v.t==='Integral';return`<h3>Reevaluación 2026</h3><p class="mt">${I?'Reevaluación integral':'Proceso FUR y avance'}${v.ob?'<br>Observación: '+v.ob:''}${I&&v.co?'<br>Corresponde: '+v.co.replace(/\s*-\s*/g,' · '):''}${v.eg?'<br>Egreso: '+v.eg:''}</p>`};
+  return`<h3>${t}${x.al?' · <span class="lo">con alerta</span>':''}</h3><table><tr><th></th><th>Nivel</th><th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>Prom.</th></tr>${row('Lenguaje',x.L)}${row('Matemática',x.M)}</table>${sb.length?`<p class="mt">Notas bajas en: ${sb.join(', ')}</p>`:''}${x.ob&&typeof x.ob==='string'?`<p class="mt">${safeText(x.ob)}</p>`:''}`;}
+const rvh=s=>{if(!s.rv)return'';const v=s.rv,I=v.t==='Integral';return`<h3>Reevaluación 2026</h3><p class="mt">${I?'Reevaluación integral':'Proceso FUR y avance'}${v.ob?'<br>Observación: '+safeText(v.ob):''}${I&&v.co?'<br>Corresponde: '+v.co.replace(/\s*-\s*/g,' · '):''}${v.eg?'<br>Egreso: '+safeText(v.eg):''}</p>`};
 function open(i){const s=S[i];
-  const at=s.att.filter(x=>x.a!=null).map(x=>{const p=pc(x.a,x.d);return`<tr><td>${x.m}</td><td>${x.a}</td><td>${x.d??'–'}</td><td class="${p!==null&&p<.85?'lo':''}">${p===null?'–':Math.round(p*100)+' %'}</td></tr>`}).join('');
-  $('sh').innerHTML=`<h2 id="dn">${s.n}</h2><p class="mt">${s.c}${tpn(s)?' · '+tpn(s):''} · ${s.dx?s.dx+(SG[s.dx]?' ('+SG[s.dx]+')':''):'Sin diagnóstico'}<br>Docente PIE: ${s.rp||'sin asignar'}${s.rut?'<br>RUT '+s.rut:''}${s.fn?' · Nacimiento '+s.fn:''}${s.fe?'<br>Diagnóstico emitido: '+s.fe:''}${s.vm?'<br>Valoración médica: '+s.vm:''}</p>
+  const at=s.att.filter(x=>x.a!=null).map(x=>{const p=pc(x.a,x.d);return`<tr><td>${safeText(x.m)}</td><td>${x.a}</td><td>${x.d??'–'}</td><td class="${p!==null&&p<.85?'lo':''}">${p===null?'–':Math.round(p*100)+' %'}</td></tr>`}).join('');
+  $('sh').innerHTML=`<h2 id="dn">${safeText(s.n)}</h2><p class="mt">${safeText(s.c)}${tpn(s)?' · '+tpn(s):''} · ${s.dx?safeText(s.dx)+(SG[s.dx]?' ('+SG[s.dx]+')':''):'Sin diagnóstico'}<br>Docente PIE: ${safeText(s.rp||'sin asignar')}${s.rut?'<br>RUT '+safeText(s.rut):''}${s.fn?' · Nacimiento '+safeText(s.fn):''}${s.fe?'<br>Diagnóstico emitido: '+safeText(s.fe):''}${s.vm?'<br>Valoración médica: '+safeText(s.vm):''}</p>
   ${rvh(s)}${notas(s.sem[0],'Notas 1er semestre')}${notas(s.sem[1],'Notas 2º semestre')}
   <h3>Asistencia${s.ap!==null?' · '+Math.round(s.ap*100)+' % en total':''}</h3>${at?`<table><tr><th>Mes</th><th>Asistió</th><th>Días</th><th>%</th></tr>${at}</table>`:'<p class="mt">Sin registros de asistencia.</p>'}
   <h3>Editar seguimiento</h3>
@@ -205,7 +205,7 @@ function open(i){const s=S[i];
 function summary(){const A=S.filter(s=>!s.ret),dx=s=>s.dx||'—',N=f=>A.filter(f).length;
   const D=[...new Set(A.map(dx))].sort(),C=[...new Set(A.map(s=>s.c))];
   const sg=D.filter(d=>SG[d]).map(d=>d+': '+SG[d]).join('. ');
-  $('v2').innerHTML=`<p class="ct">${A.length} estudiantes · ${N(s=>s.tp==='T')} transitorios · ${N(s=>s.tp==='P')} permanentes${N(s=>!s.tp)?' · '+N(s=>!s.tp)+' sin tipo':''}${N(s=>s.rv)?'<br>Reevaluación 2026: '+N(s=>s.rv&&s.rv.t==='Integral')+' integrales · '+N(s=>s.rv&&s.rv.t!=='Integral')+' en proceso · '+N(s=>eg(s))+' con posible egreso':''}</p><div class="sm"><table><tr><th>Curso</th>${D.map(d=>`<th title="${SG[d]||''}">${d}</th>`).join('')}<th>Total</th></tr>${C.map(c=>`<tr><td>${c}</td>${D.map(d=>`<td>${N(s=>s.c===c&&dx(s)===d)||''}</td>`).join('')}<td><b>${N(s=>s.c===c)}</b></td></tr>`).join('')}<tr><td><b>Total</b></td>${D.map(d=>`<td><b>${N(s=>dx(s)===d)}</b></td>`).join('')}<td><b>${A.length}</b></td></tr></table></div><p class="note">${sg}${sg?'.':''} No se cuentan los estudiantes retirados.</p>`;}
+  $('v2').innerHTML=`<p class="ct">${A.length} estudiantes · ${N(s=>s.tp==='T')} transitorios · ${N(s=>s.tp==='P')} permanentes${N(s=>!s.tp)?' · '+N(s=>!s.tp)+' sin tipo':''}${N(s=>s.rv)?'<br>Reevaluación 2026: '+N(s=>s.rv&&s.rv.t==='Integral')+' integrales · '+N(s=>s.rv&&s.rv.t!=='Integral')+' en proceso · '+N(s=>eg(s))+' con posible egreso':''}</p><div class="sm"><table><tr><th>Curso</th>${D.map(d=>`<th title="${SG[d]||''}">${safeText(d)}</th>`).join('')}<th>Total</th></tr>${C.map(c=>`<tr><td>${safeText(c)}</td>${D.map(d=>`<td>${N(s=>s.c===c&&dx(s)===d)||''}</td>`).join('')}<td><b>${N(s=>s.c===c)}</b></td></tr>`).join('')}<tr><td><b>Total</b></td>${D.map(d=>`<td><b>${N(s=>dx(s)===d)}</b></td>`).join('')}<td><b>${A.length}</b></td></tr></table></div><p class="note">${sg}${sg?'.':''} No se cuentan los estudiantes retirados.</p>`;}
 
 const safeText = v => String(v??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function renderEdit(i){
@@ -251,7 +251,7 @@ const b64=u=>{u=new Uint8Array(u);let s='';for(let i=0;i<u.length;i+=8192)s+=Str
 const ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const dk=async(p,salt)=>{const m=await crypto.subtle.importKey('raw',new TextEncoder().encode(p),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])};
 function sv(){refreshSaved()}
-async function guardar(){const p=$('pw').value;if(p.length<4)return msg('Usa una clave de al menos 4 caracteres.');
+async function guardar(){const p=$('pw').value;if(p.length<12)return msg('Por seguridad, usa una contraseña de al menos 12 caracteres. Puedes usar una frase larga fácil de recordar.');
   try{const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),k=await dk(p,salt);
     const d=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,new TextEncoder().encode(JSON.stringify({NS,NM,NE,NR,S})));
     localStorage.setItem(KS,JSON.stringify({s:b64(salt),i:b64(iv),d:b64(d)}));if(!has())throw Error('No persistió');$('pw').value='';clearDirty();sv();msg('Guardado cifrado confirmado en este navegador. Para recuperarlo, al volver a entrar usa «Abrir datos guardados».')}
@@ -304,7 +304,8 @@ $('q').oninput=e=>{st.q=e.target.value;draw()};
 $('lv').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;st.lv=b.dataset.l;$('lv').querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));draw()};
 $('ls').onclick=e=>{const b=e.target.closest('.st');if(b)open(+b.dataset.i)};
 $('ov').onclick=e=>{if(e.target===$('ov')||e.target.id==='cl')close()};
-$('gd').onclick=guardar;$('op').onclick=abrir;$('rm').onclick=borrar;$('rm0').onclick=borrar;
+$('lockBtn').onclick=()=>{if(dirty&&!confirm('Hay cambios sin guardar. ¿Cerrar la sesión igualmente?'))return;NS=NM=NE=NR=null;S=[];clearDirty();$('app').classList.add('hid');$('start').classList.remove('hid');$('pw').value='';$('pw0').value='';refreshSaved();window.scrollTo(0,0);};
+ $('gd').onclick=guardar;$('op').onclick=abrir;$('rm').onclick=borrar;$('rm0').onclick=borrar;
 refreshSaved();
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
 document.onkeydown=e=>{if(e.key==='Escape')close()};
