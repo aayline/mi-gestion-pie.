@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi Gestión PIE · Valentín Letelier</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#F2F6F7;--sf:#fff;--ink:#12272F;--mu:#58707A;--ln:#D3DFE2;--br:#1D5C70;--on:#fff;--bad:#B3261E;--badbg:#FBE4E1;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0E1A1F;--sf:#16262D;--ink:#E6EFF2;--mu:#9BB0B8;--ln:#2A3F48;--br:#6FB8CF;--on:#06202A;--bad:#FFB4AB;--badbg:#5A1F1B}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0E1A1F;--sf:#16262D;--ink:#E6EFF2;--mu:#9BB0B8;--ln:#2A3F48;--br:#6FB8CF;--on:#06202A;--bad:#FFB4AB;--badbg:#5A1F1B}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 'Atkinson Hyperlegible',system-ui,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.w{max-width:720px;margin:0 auto;padding:0 16px}
+h1{margin:0;padding-top:18px;font-size:1.45rem;line-height:1.2}
+.sub{margin:4px 0 10px;color:var(--mu);font-size:.93rem}
+button,input,select{font:inherit;color:var(--ink)}
+input[type=search],input[type=password],select{width:100%;background:var(--sf);border:1.5px solid var(--ln);border-radius:10px;padding:11px 12px}
+:focus-visible{outline:3px solid var(--br);outline-offset:2px}
+.btn{background:var(--br);color:var(--on);border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;display:inline-block}
+.btn.alt{background:transparent;color:var(--br);border:1.5px solid var(--br)}
+#start{padding:8px 0 24px}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:18px;margin-bottom:12px}
+.card p{margin:0 0 12px}
+.tabs{display:flex;gap:8px;padding:6px 0 4px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar,.chips::-webkit-scrollbar{display:none}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:8px 0 12px;border-bottom:1px solid var(--ln)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.chip{flex:none;white-space:nowrap;font-weight:700;background:var(--sf);border:1.5px solid var(--ln);border-radius:999px;padding:7px 14px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--br);color:var(--on);border-color:var(--br)}
+.r3{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.r3 select:last-child{grid-column:span 2}
+main{padding:12px 0 40px}
+.ct{color:var(--mu);font-size:.95rem;margin:0 0 8px}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.st{width:100%;text-align:left;background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:center;cursor:pointer}
+.cu{grid-row:span 5;min-width:3.2rem;text-align:center;font-weight:700;font-size:1.1rem;color:var(--br);border-right:1px solid var(--ln);padding-right:12px}
+.nm{font-weight:700}.dx{color:var(--mu);font-size:.92rem}
+.gh{margin:14px 0 2px;font-weight:700;font-size:1.05rem}
+.bd{display:inline-block;border-radius:6px;padding:1px 8px;font-size:.85rem;margin:2px 6px 0 0;background:var(--badbg);color:var(--bad)}
+.bd.n{background:var(--ln);color:var(--ink)}
+.empty{padding:28px 8px;text-align:center;color:var(--mu)}
+.ov{position:fixed;inset:0;background:rgba(5,15,20,.55);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.ov.on{display:flex}
+.sh{background:var(--sf);width:100%;max-width:600px;max-height:90%;overflow:auto;border-radius:18px 18px 0 0;padding:20px 16px calc(24px + env(safe-area-inset-bottom,0px))}
+.sh h2{margin:0;font-size:1.3rem}.sh h3{margin:18px 0 6px;font-size:1rem}
+.mt{color:var(--mu);margin:2px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th,td{padding:6px 4px;border-bottom:1px solid var(--ln);text-align:center}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mu);font-weight:400}
+.lo{color:var(--bad);font-weight:700}
+.sm{overflow-x:auto}.sm th,.sm td{padding:6px 8px;white-space:nowrap}
+.note{margin-top:14px;font-size:.85rem;color:var(--mu)}
+details.card summary{cursor:pointer;font-weight:700}.card .btn{margin:10px 8px 0 0}
+.hid{display:none}
+</style>
+</head>
+<body>
+<div class="w">
+<h1>Mi Gestión PIE · Valentín Letelier</h1>
+<p class="sub">Tus planillas se procesan en este dispositivo. Guarda con clave y genera respaldos cifrados.</p>
+<div id="start">
+  <div class="card" id="sv0"><strong>Recuperar mi trabajo</strong><p id="savedStatus">Comprobando datos guardados…</p><input id="pw0" type="password" placeholder="Tu clave" aria-label="Tu clave" autocomplete="current-password"><button class="btn" id="op">Abrir datos guardados</button><button class="btn alt hid" id="rm0">Borrar datos guardados</button><p class="mt" id="openMsg" role="status"></p></div>
+  <div class="card">
+    <p>Carga tus planillas de notas y asistencia, la nómina PIE y la reevaluación 2026 (.xlsx). Puedes elegir varios archivos a la vez.</p>
+    <label class="btn" tabindex="0" id="lb">Elegir planillas<input id="fi" type="file" accept=".xlsx" multiple class="hid"></label>
+    <p id="er" class="lo" style="margin:12px 0 0" role="alert"></p>
+  </div>
+  <button class="btn alt" id="demo">Ver con datos de ejemplo</button><div class="card"><strong>Restaurar respaldo cifrado</strong><p class="mt">Selecciona un archivo de respaldo .json y luego introduce su contraseña.</p><input id="restoreFile" type="file" accept=".json,application/json"><input id="restorePw" type="password" placeholder="Contraseña del respaldo"><button class="btn alt" id="restoreBtn">Restaurar respaldo</button></div>
+</div>
+<div id="app" class="hid">
+  <div class="tabs"><button class="chip" id="t1">Estudiantes</button><button class="chip" id="t2">Seguimiento</button><button class="chip" id="t3">Reevaluación 2026</button><button class="chip" id="t4">Resumen</button><label class="chip" tabindex="0" id="lb2">Agregar planilla<input id="f2" type="file" accept=".xlsx" multiple class="hid"></label></div>
+  <p class="ct" id="ld" role="status"></p><p class="card hid" id="dirtyMsg" role="status" style="border-color:#b67d26">⚠️ Tienes cambios sin guardar. Abre «Guardar en este dispositivo» y presiona «Guardar» antes de salir.</p>
+  <details class="card" id="sv"><summary>Guardar en este dispositivo</summary><p class="mt">Se guarda cifrado con una clave que tú eliges, solo en este navegador. Si la olvidas, tendrás que cargar las planillas de nuevo.</p><input id="pw" type="password" placeholder="Elige una clave" aria-label="Elige una clave" autocomplete="new-password"><button class="btn" id="gd">Guardar</button><button class="btn alt hid" id="rm">Borrar datos guardados</button><button class="btn alt" id="backupBtn">Descargar respaldo cifrado</button><button class="btn alt" id="lockBtn">Cerrar sesión</button><p class="mt" id="sm" role="status"></p><p class="note">Después de editar, presiona Guardar para conservar los cambios cifrados. El respaldo descargado permite recuperar datos si cambias de dispositivo.</p></details>
+  <div id="v1">
+  <div class="bar">
+    <input id="q" type="search" placeholder="Buscar estudiante" aria-label="Buscar estudiante" autocomplete="off">
+    <div class="chips" id="lv" role="group" aria-label="Nivel"></div>
+    <div class="r3">
+      <select id="lt" aria-label="Letra del curso"><option value="">Todas las letras</option><option>A</option><option>B</option></select>
+      <select id="md" aria-label="Mostrar"></select>
+      <select id="pf" aria-label="Docente PIE"><option value="">Todos los docentes</option></select>
+    </div>
+  </div>
+  <main><p class="ct" id="ct" aria-live="polite"></p><ul id="ls"></ul>
+  <p class="note" id="nt"></p></main>
+  </div>
+  <div id="v2" class="hid"></div>
+</div>
+</div>
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="dn"><div class="sh" id="sh"></div></div>
+<script>
+const $=id=>document.getElementById(id);
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
+const ok=v=>typeof v==='number'&&v>=1&&v<=7;
+const avg=a=>{const v=a.filter(ok);return v.length?v.reduce((x,y)=>x+y,0)/v.length:null};
+const f1=v=>v==null?'–':v.toFixed(1).replace('.',',');
+const pc=(a,d)=>typeof a==='number'&&typeof d==='number'&&d>0?a/d:null;
+const rows=ws=>{const r=XLSX.utils.decode_range(ws['!ref']||'A1'),a=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null}),p=new Array(r.s.c).fill(null);return[...Array(r.s.r).fill([]),...a.map(x=>[...p,...x])]};
+const t0=x=>x==null?'':String(x).trim();
+const fd=v=>{if(v==null||v==='')return'';if(typeof v==='number'&&v>20000&&v<80000){const d=new Date(Math.round((v-25569)*864e5));return String(d.getUTCDate()).padStart(2,'0')+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+d.getUTCFullYear()}return t0(v)};
+let S=[],NS=null,NM=null,NE=null,NR=null,TB=1,dirty=false,st={q:'',lv:'',lt:'',md:'',pf:''};
+const SG={TL:'Trastorno del lenguaje',TLE:'Trastorno de lenguaje expresivo',TLM:'Trastorno de lenguaje mixto',TEA:'Trastorno del espectro autista',TDA:'Trastorno de déficit atencional',TDAH:'Trastorno de déficit atencional con hiperactividad',DIL:'Discapacidad intelectual leve',DIM:'Discapacidad intelectual moderada',FIL:'Funcionamiento intelectual limítrofe',DEA:'Dificultades específicas del aprendizaje'};
+const MD={1:[['','Todos'],['t','Transitorios'],['p','Permanentes']],2:[['','Todos'],['n','Con alerta de notas'],['a','Asistencia bajo 85 %']],3:[['','Todos'],['e','Posible egreso']]};
+const cur=c=>String(c||'').replace(/\s/g,'').replace('º','°');
+const tk=s=>norm(s).split(' ').filter(Boolean);
+const l1=(a,b)=>{if(a===b)return true;if(a.length<5||b.length<5||Math.abs(a.length-b.length)>1)return false;let i=0;while(a[i]===b[i])i++;return a.slice(i+1)===b.slice(i+1)||a.slice(i)===b.slice(i+1)||a.slice(i+1)===b.slice(i)};
+const sim=(a,b)=>{const A=tk(a),B=tk(b);let m=0;A.forEach(x=>{if(B.some(y=>l1(x,y)))m++});return m/Math.max(A.length,B.length)};
+const E=()=>({L:{k:'',g:[]},M:{k:'',g:[]},al:false,sub:[false,false,false],ob:''});
+const eg=s=>s.rv&&/egreso|alta/i.test(s.rv.eg+' '+s.rv.ob);
+function sem(r,o,ob){const A=i=>({k:r[i],g:[1,2,3,4].map(j=>r[i+j])});
+  return{L:A(7+o),M:A(12+o),al:r[17+o]===true||r[17+o]==='TRUE',sub:[18,19,20].map(j=>r[j+o]===true),ob:r[ob]};}
+function attMap(ws){const m=new Map();if(!ws)return m;const R=rows(ws),h=R[5]||[],d=R[3]||[];
+  R.slice(6).forEach(r=>{if(typeof r[3]!=='string')return;
+    m.set(norm(r[3]),[7,10,13,16,18].filter(c=>h[c]).map(c=>({m:h[c],d:d[c],a:r[c]})));});return m;}
+function loadNotas(wb){
+  const N=wb.Sheets['Notas'];if(!N)throw 'No encontré la hoja Notas.';
+  const a1=attMap(wb.Sheets['Asistencia 1er semestre']),a2=attMap(wb.Sheets['Asistencia 2do semestre']);
+  NS=rows(N).filter(r=>typeof r[2]==='string'&&/^\d\s*[º°]/.test(String(r[3]))).map(r=>{
+    const s1=sem(r,0,21),s2=sem(r,15,36),k=norm(r[2]);
+    return{n:r[2].trim(),c:cur(r[3]),dx:r[4]||'',rp:t0(r[5]),ret:/retirad/i.test(String(s1.ob)+String(s2.ob)+String(r[21])),sem:[s1,s2],att:[...(a1.get(k)||[]),...(a2.get(k)||[])]};});
+  if(!NS.length)throw 'No encontré estudiantes en la hoja Notas.';}
+function nomina(wb){const L=[],X=[];
+  const take=(n,ci,ni,di,pi,tp)=>{const ws=wb.Sheets[n];if(!ws)return;rows(ws).forEach(r=>{if(typeof r[ni]!=='string'||!/^\d\s*[º°]/.test(String(r[ci])))return;L.push({n:r[ni].trim(),c:cur(r[ci]),dx:r[di],rp:t0(r[pi]),tp})})};
+  take('Transitorios',1,2,5,6,'T');take('Permanentes',2,3,4,5,'P');
+  const W=wb.Sheets['ESTUDIANTES 2026'];
+  if(W)rows(W).forEach(r=>{if(typeof r[6]!=='string'||!/^\d\s*[º°]/.test(String(r[9])))return;X.push({n:r[6].trim(),c:cur(r[9]),dx:r[10],rut:t0(r[7]),fn:fd(r[8]),fe:fd(r[11]),vm:fd(r[12])})});
+  if(!L.length&&!X.length)throw 'No encontré estudiantes en la nómina.';
+  const dc={},D=wb.Sheets['DOCENTES POR CURSO'];if(D)rows(D).forEach(r=>{if(r[2]&&r[3])dc[cur(r[2])]=t0(r[3])});
+  L.forEach(x=>{if(!x.rp)x.rp=dc[x.c]||''});NM=L;NE=X;}
+function reev(wb){const L=[];
+  wb.SheetNames.forEach(sn=>{const k=norm(sn),I=k.startsWith('reevaluacion integral');if(!I&&!k.startsWith('reevaluacion proceso'))return;
+    rows(wb.Sheets[sn]).forEach(r=>{if(typeof r[3]!=='string'||!/^\d\s*[º°]/.test(String(r[4])))return;
+      L.push({n:r[3].trim(),c:cur(r[4]),dx:r[5],rv:{t:I?'Integral':'FUR y avance',ob:t0(r[6]),co:t0(r[7]),eg:I?t0(r[8]):''}})})});
+  if(!L.length)throw 'No encontré las hojas de reevaluación.';NR=L;}
+function calc(L){L.forEach(s=>{const p=s.att.filter(x=>typeof x.a==='number'&&x.d>0);
+  s.ap=p.length?p.reduce((t,x)=>t+x.a,0)/p.reduce((t,x)=>t+x.d,0):null;
+  s.an=s.sem.some(x=>x.al)||s.sem.some(x=>[x.L,x.M].some(y=>{const v=avg(y.g);return v!==null&&v<4}));
+  s.aa=s.ap!==null&&s.ap<.85;
+  const x=s.sem.find(q=>[q.L,q.M].some(y=>y.g.some(ok)));s.pl=x?avg(x.L.g):null;s.pm=x?avg(x.M.g):null;});}
+function build(){
+  const T=NS?NS.map(s=>({...s})):[];let un=0;
+  T.forEach(s=>s.dx=String(s.dx||'').trim().toUpperCase());
+  const mg=(L,f,hb)=>(L||[]).forEach(m=>{m.dx=String(m.dx||'').trim().toUpperCase();
+    let b=null,bs=0;T.forEach(s=>{if(s.c!==m.c)return;const v=sim(m.n,s.n);if(v>bs){bs=v;b=s}});
+    if(b&&bs>=.6)f(b,m);
+    else{if(hb)un++;const s={n:m.n,c:m.c,dx:m.dx,rp:m.rp||'',ret:false,sem:[E(),E()],att:[]};f(s,m);T.push(s)}});
+  const b1=!!NS,b2=b1||!!(NM&&NM.length),b3=b2||!!(NE&&NE.length);
+  mg(NM,(s,m)=>{s.tp=m.tp;s.dx=m.dx||s.dx;s.rp=m.rp||s.rp},b1);
+  mg(NE,(s,m)=>{s.rut=m.rut;s.fn=m.fn;s.fe=m.fe;s.vm=m.vm;s.dx=s.dx||m.dx},b2);
+  mg(NR,(s,m)=>{s.rv=m.rv;s.dx=s.dx||m.dx},b3);
+  S=T.sort((a,b)=>parseInt(a.c)-parseInt(b.c)||a.c.localeCompare(b.c)||a.n.localeCompare(b.n));
+  calc(S);start();
+  $('ld').textContent='Cargado: '+[NS&&'notas y asistencia',NM&&NM.length&&'transitorios y permanentes',NE&&NE.length&&'datos de estudiantes',NR&&'reevaluación 2026'].filter(Boolean).join(', ')+'. '+(un?un+' nombres no se pudieron emparejar con las otras planillas.':'');}
+function start(){
+  $('start').classList.add('hid');$('app').classList.remove('hid');$('sv').classList.remove('hid');sv();
+  st={q:'',lv:'',lt:'',md:'',pf:''};['q','lt'].forEach(k=>$(k).value='');
+  const lv=[...new Set(S.map(s=>parseInt(s.c)))].sort((a,b)=>a-b);
+  $('lv').innerHTML=['Todos',...lv].map((l,i)=>`<button class="chip" data-l="${i?l:''}" aria-pressed="${!i}">${i?l+'°':l}</button>`).join('');
+  $('pf').innerHTML='<option value="">Todos los docentes</option>'+[...new Set(S.map(s=>s.rp).filter(Boolean))].sort().map(p=>`<option>${safeText(p)}</option>`).join('');
+  $('nt').textContent='Una nota fuera de 1,0 a 7,0 se marca con ⚠ para que la revises en la planilla. La asistencia se calcula con los días asistidos sobre los días del mes.';
+  tab(1);}
+function tab(n){TB=n;$('v1').classList.toggle('hid',n===4);$('v2').classList.toggle('hid',n!==4);
+  [1,2,3,4].forEach(i=>$('t'+i).setAttribute('aria-pressed',i===n));
+  if(n===4)return summary();
+  st.md='';$('md').innerHTML=MD[n].map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');$('nt').classList.toggle('hid',n!==2);draw();}
+const bt=(s,x)=>`<li><button class="st" data-i="${S.indexOf(s)}"><span class="cu">${s.c}</span>${x}</button></li>`;
+const ln=a=>{a=a.filter(Boolean);return a.length?`<span class="dx">${a.map(safeText).join(' · ')}</span>`:''};
+const tpn=s=>s.tp?(s.tp==='P'?'Permanente':'Transitorio'):'';
+const ret=s=>s.ret?'<span class="bd n">Retirado/a</span>':'';
+function row1(s){return bt(s,`<span class="nm">${safeText(s.n)}</span>`+ln([s.rut&&'RUT '+s.rut,s.fn&&'Nac. '+s.fn])+ln([s.dx||'Sin diagnóstico',tpn(s),s.rp&&'Docente: '+s.rp])+ln([s.fe&&'Diagnóstico emitido '+s.fe,s.vm&&'Valoración médica '+s.vm])+`<span>${ret(s)}</span>`)}
+function row2(s){return bt(s,`<span class="nm">${safeText(s.n)}</span>`+ln([s.dx||'Sin diagnóstico',s.rp&&'Docente: '+s.rp])+ln(['Lenguaje '+f1(s.pl),'Matemática '+f1(s.pm),'Asistencia '+(s.ap==null?'–':Math.round(s.ap*100)+' %')])+`<span>${ret(s)}${s.an?'<span class="bd">Alerta de notas</span>':''}${s.aa?'<span class="bd">Asistencia baja</span>':''}</span>`)}
+function row3(s){const v=s.rv,I=v.t==='Integral';return bt(s,`<span class="nm">${safeText(s.n)}</span>`+ln([s.dx||'Sin diagnóstico',tpn(s),s.rp&&'Docente: '+s.rp])+ln([v.ob&&'Observación: '+v.ob])+(I&&v.co?ln(['Corresponde: '+v.co.replace(/\s*-\s*/g,' · ')]):'')+`<span>${ret(s)}${eg(s)?'<span class="bd n">Posible egreso</span>':''}</span>`)}
+function draw(){
+  let r=S.filter(s=>(!st.q||norm(s.n).includes(norm(st.q)))&&(!st.lv||parseInt(s.c)==st.lv)&&(!st.lt||s.c.endsWith(st.lt))&&(!st.pf||s.rp===st.pf));
+  if(TB===1)r=r.filter(s=>(st.md!=='t'||s.tp==='T')&&(st.md!=='p'||s.tp==='P'));
+  if(TB===2)r=r.filter(s=>(st.md!=='n'||s.an)&&(st.md!=='a'||s.aa));
+  if(TB===3)r=r.filter(s=>s.rv&&(st.md!=='e'||eg(s)));
+  $('ct').textContent=r.length+(r.length===1?' estudiante':' estudiantes');
+  let h;
+  if(TB===3){const g=(t,tt)=>{const a=r.filter(s=>s.rv.t===t);return`<li class="gh">${tt} · ${a.length}</li>`+a.map(row3).join('')};h=r.length?g('Integral','Reevaluación integral')+g('FUR y avance','En proceso (FUR y avance)'):'';}
+  else h=r.map(TB===1?row1:row2).join('');
+  $('ls').innerHTML=h||'<li class="empty">Ningún estudiante coincide. Cambia o quita un filtro.</li>';}
+const gc=v=>ok(v)?`<td class="${v<4?'lo':''}">${f1(v)}</td>`:`<td title="${v==null?'':'Revisar en la planilla'}">${v==null?'–':typeof v==='number'?'⚠':safeText(v)}</td>`;
+function notas(x,t){if(![x.L,x.M].some(y=>y.g.some(v=>v!=null)||y.k))return'';
+  const row=(n,y)=>{const a=avg(y.g);return`<tr><td>${n}</td><td>${safeText(y.k||'–')}</td>${y.g.map(gc).join('')}<td class="${a!==null&&a<4?'lo':''}">${f1(a)}</td></tr>`};
+  const sb=['Inglés','Ciencias','Historia'].filter((_,i)=>x.sub[i]);
+  return`<h3>${t}${x.al?' · <span class="lo">con alerta</span>':''}</h3><table><tr><th></th><th>Nivel</th><th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>Prom.</th></tr>${row('Lenguaje',x.L)}${row('Matemática',x.M)}</table>${sb.length?`<p class="mt">Notas bajas en: ${sb.join(', ')}</p>`:''}${x.ob&&typeof x.ob==='string'?`<p class="mt">${safeText(x.ob)}</p>`:''}`;}
+const rvh=s=>{if(!s.rv)return'';const v=s.rv,I=v.t==='Integral';return`<h3>Reevaluación 2026</h3><p class="mt">${I?'Reevaluación integral':'Proceso FUR y avance'}${v.ob?'<br>Observación: '+safeText(v.ob):''}${I&&v.co?'<br>Corresponde: '+v.co.replace(/\s*-\s*/g,' · '):''}${v.eg?'<br>Egreso: '+safeText(v.eg):''}</p>`};
+function open(i){const s=S[i];
+  const at=s.att.filter(x=>x.a!=null).map(x=>{const p=pc(x.a,x.d);return`<tr><td>${safeText(x.m)}</td><td>${x.a}</td><td>${x.d??'–'}</td><td class="${p!==null&&p<.85?'lo':''}">${p===null?'–':Math.round(p*100)+' %'}</td></tr>`}).join('');
+  $('sh').innerHTML=`<h2 id="dn">${safeText(s.n)}</h2><p class="mt">${safeText(s.c)}${tpn(s)?' · '+tpn(s):''} · ${s.dx?safeText(s.dx)+(SG[s.dx]?' ('+SG[s.dx]+')':''):'Sin diagnóstico'}<br>Docente PIE: ${safeText(s.rp||'sin asignar')}${s.rut?'<br>RUT '+safeText(s.rut):''}${s.fn?' · Nacimiento '+safeText(s.fn):''}${s.fe?'<br>Diagnóstico emitido: '+safeText(s.fe):''}${s.vm?'<br>Valoración médica: '+safeText(s.vm):''}</p>
+  ${rvh(s)}${notas(s.sem[0],'Notas 1er semestre')}${notas(s.sem[1],'Notas 2º semestre')}
+  <h3>Asistencia${s.ap!==null?' · '+Math.round(s.ap*100)+' % en total':''}</h3>${at?`<table><tr><th>Mes</th><th>Asistió</th><th>Días</th><th>%</th></tr>${at}</table>`:'<p class="mt">Sin registros de asistencia.</p>'}
+  <h3>Editar seguimiento</h3>
+  <p class="mt">Edita las notas por semestre y asignatura (N1–N4) y los días de asistencia. Los cambios se guardan en memoria hasta que pulses «Guardar» con tu clave.</p>
+  <div id="editPanel"></div>
+  <button class="btn" id="cl" style="width:100%;margin-top:18px">Cerrar</button>`;
+  $('ov').classList.add('on');renderEdit(i);$('cl').focus();}
+function summary(){const A=S.filter(s=>!s.ret),dx=s=>s.dx||'—',N=f=>A.filter(f).length;
+  const D=[...new Set(A.map(dx))].sort(),C=[...new Set(A.map(s=>s.c))];
+  const sg=D.filter(d=>SG[d]).map(d=>d+': '+SG[d]).join('. ');
+  $('v2').innerHTML=`<p class="ct">${A.length} estudiantes · ${N(s=>s.tp==='T')} transitorios · ${N(s=>s.tp==='P')} permanentes${N(s=>!s.tp)?' · '+N(s=>!s.tp)+' sin tipo':''}${N(s=>s.rv)?'<br>Reevaluación 2026: '+N(s=>s.rv&&s.rv.t==='Integral')+' integrales · '+N(s=>s.rv&&s.rv.t!=='Integral')+' en proceso · '+N(s=>eg(s))+' con posible egreso':''}</p><div class="sm"><table><tr><th>Curso</th>${D.map(d=>`<th title="${SG[d]||''}">${safeText(d)}</th>`).join('')}<th>Total</th></tr>${C.map(c=>`<tr><td>${safeText(c)}</td>${D.map(d=>`<td>${N(s=>s.c===c&&dx(s)===d)||''}</td>`).join('')}<td><b>${N(s=>s.c===c)}</b></td></tr>`).join('')}<tr><td><b>Total</b></td>${D.map(d=>`<td><b>${N(s=>dx(s)===d)}</b></td>`).join('')}<td><b>${A.length}</b></td></tr></table></div><p class="note">${sg}${sg?'.':''} No se cuentan los estudiantes retirados.</p>`;}
+
+const safeText = v => String(v??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function renderEdit(i){
+ const s=S[i], field=(label,key,value,type='number',step='1')=>`<label style="display:block;margin:8px 0">${label}<input style="width:100%" type="${type}" step="${step}" data-key="${key}" value="${safeText(value)}"></label>`;
+ let html='';
+ for(let sem=0;sem<2;sem++){
+  html+=`<h3>Semestre ${sem+1}</h3>`;
+  for(const [name,code] of [['Lenguaje','L'],['Matemática','M']]){
+   html+=`<strong>${name}</strong><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">`;
+   for(let n=0;n<4;n++)html+=field('N'+(n+1),`g:${sem}:${code}:${n}`,s.sem[sem][code].g[n]??'','number','0.1');
+   html+='</div>';
+  }
+ }
+ html+='<h3>Asistencia mensual</h3>';
+ s.att.forEach((a,j)=>{html+=`<div class="card"><strong>${safeText(a.m)}</strong><div class="r3">${field('Asistió',`a:${j}`,a.a??'')}${field('Días de clase',`d:${j}`,a.d??'')}</div></div>`});
+ html+='<h3>Agregar mes de asistencia</h3>'+field('Mes (ej. Octubre)','newmonth','','text')+field('Días asistidos','newatt','')+field('Días de clase','newdays','');
+ html+=`<button class="btn" id="applyEdit">Aplicar cambios</button><p id="editMsg" class="mt"></p>`;
+ $('editPanel').innerHTML=html;
+ $('applyEdit').onclick=()=>{
+  const inputs=[...$('editPanel').querySelectorAll('[data-key]')],vals=Object.fromEntries(inputs.map(x=>[x.dataset.key,x.value.trim()]));
+  for(let sem=0;sem<2;sem++)for(const code of ['L','M'])for(let n=0;n<4;n++){
+   const v=vals[`g:${sem}:${code}:${n}`];if(v!==''&&(!Number.isFinite(Number(v))||Number(v)<1||Number(v)>7)){ $('editMsg').textContent='Las notas deben estar entre 1,0 y 7,0.';return;}
+  }
+  for(let j=0;j<s.att.length;j++){const a=vals[`a:${j}`],d=vals[`d:${j}`];if(a!==''&&d!==''&&(!Number.isInteger(+a)||!Number.isInteger(+d)||+a<0||+d<1||+a>+d)){$('editMsg').textContent='Revisa los días de asistencia.';return;}}
+  if(vals.newmonth||vals.newatt||vals.newdays){
+   if(!vals.newmonth||!Number.isInteger(+vals.newatt)||!Number.isInteger(+vals.newdays)||+vals.newatt<0||+vals.newdays<1||+vals.newatt>+vals.newdays){$('editMsg').textContent='Completa el mes y sus días correctamente.';return;}
+  }
+  for(let sem=0;sem<2;sem++)for(const code of ['L','M'])for(let n=0;n<4;n++){const v=vals[`g:${sem}:${code}:${n}`];s.sem[sem][code].g[n]=v===''?null:Number(v);}
+  s.att.forEach((a,j)=>{a.a=vals[`a:${j}`]===''?null:+vals[`a:${j}`];a.d=vals[`d:${j}`]===''?null:+vals[`d:${j}`]});
+  if(vals.newmonth)s.att.push({m:vals.newmonth,a:+vals.newatt,d:+vals.newdays});
+  // Keep edited data as the canonical source for rebuilding after adding planillas.
+  const source=NS&&NS.find(x=>x.n===s.n&&x.c===s.c);
+  if(source){source.sem=structuredClone(s.sem);source.att=structuredClone(s.att);}
+  calc(S);draw();open(i);$('editMsg').textContent='Cambios aplicados. Guarda desde el panel principal para conservarlos.';
+ };
+}
+
+const KS='pie-datos-v1',has=()=>{try{return!!localStorage.getItem(KS)}catch(e){return false}},msg=t=>$('sm').textContent=t;
+function markDirty(){dirty=true;$('dirtyMsg').classList.remove('hid')}
+function clearDirty(){dirty=false;$('dirtyMsg').classList.add('hid')}
+function refreshSaved(){const saved=has();$('savedStatus').textContent=saved?'Hay datos cifrados guardados en este navegador. Ingresa tu contraseña para recuperarlos.':'No se encontraron datos guardados en este navegador. Si tienes un respaldo .json, puedes restaurarlo abajo. Si guardaste antes, revisa que uses el mismo Safari y no la navegación privada.';$('op').disabled=!saved;$('pw0').disabled=!saved;$('rm0').classList.toggle('hid',!saved);$('rm').classList.toggle('hid',!saved)}
+const b64=u=>{u=new Uint8Array(u);let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
+const ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const dk=async(p,salt)=>{const m=await crypto.subtle.importKey('raw',new TextEncoder().encode(p),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])};
+function sv(){refreshSaved()}
+async function guardar(){const p=$('pw').value;if(p.length<12)return msg('Por seguridad, usa una contraseña de al menos 12 caracteres. Puedes usar una frase larga fácil de recordar.');
+  try{const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),k=await dk(p,salt);
+    const d=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,new TextEncoder().encode(JSON.stringify({NS,NM,NE,NR,S})));
+    localStorage.setItem(KS,JSON.stringify({s:b64(salt),i:b64(iv),d:b64(d)}));if(!has())throw Error('No persistió');$('pw').value='';clearDirty();sv();msg('Guardado cifrado confirmado en este navegador. Para recuperarlo, al volver a entrar usa «Abrir datos guardados».')}
+  catch(e){msg('No pude guardar en este dispositivo.')}}
+async function abrir(){try{const o=JSON.parse(localStorage.getItem(KS)),k=await dk($('pw0').value,ub(o.s));
+    const d=await crypto.subtle.decrypt({name:'AES-GCM',iv:ub(o.i)},k,ub(o.d));({NS,NM,NE,NR,S}=JSON.parse(new TextDecoder().decode(d)));if(S&&S.length){calc(S);start();clearDirty();$('ld').textContent='Datos restaurados de este dispositivo.'}else {build();clearDirty()}}
+  catch(e){$('openMsg').textContent='No se pudieron abrir los datos. Comprueba la contraseña.'}}
+
+$('backupBtn').onclick=()=>{
+ const stored=localStorage.getItem(KS);
+ if(!stored){msg('Primero guarda los datos con una clave.');return;}
+ const blob=new Blob([stored],{type:'application/json'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='respaldo-pie-cifrado-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);
+ msg('Respaldo cifrado descargado. Guárdalo en un lugar seguro.');
+};
+$('restoreBtn').onclick=async()=>{
+ try{
+  const file=$('restoreFile').files[0];if(!file)throw Error('Selecciona un respaldo.');
+  const obj=JSON.parse(await file.text());if(!obj.s||!obj.i||!obj.d)throw Error('El archivo no es un respaldo válido.');
+  const key=await dk($('restorePw').value,ub(obj.s));
+  const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:ub(obj.i)},key,ub(obj.d));
+  const data=JSON.parse(new TextDecoder().decode(plain));
+  if(!Array.isArray(data.S))throw Error('Respaldo incompatible.');
+  if(!confirm('¿Reemplazar los datos locales con este respaldo?'))return;
+  localStorage.setItem(KS,JSON.stringify(obj));({NS,NM,NE,NR,S}=data);calc(S);start();clearDirty();$('ld').textContent='Respaldo restaurado.';
+ }catch(e){$('er').textContent='No se pudo restaurar. Revisa el archivo y la contraseña.'}
+};
+function borrar(){try{localStorage.removeItem(KS)}catch(e){}sv();msg('Datos borrados de este dispositivo.')}
+const close=()=>$('ov').classList.remove('on');
+async function files(l){const em=t=>{$('er').textContent=t;$('ld').textContent=t};em('');
+  try{for(const f of l){const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});
+    if(wb.Sheets['Notas'])loadNotas(wb);
+    else if(wb.Sheets['Transitorios']||wb.Sheets['Permanentes']||wb.Sheets['ESTUDIANTES 2026'])nomina(wb);
+    else if(wb.SheetNames.some(n=>norm(n).startsWith('reevaluacion')))reev(wb);
+    else throw 'No reconocí «'+f.name+'». Necesito la planilla de notas, la nómina PIE o la reevaluación.';}
+    if(NS||NM||NE||NR){build();markDirty();}}catch(x){em(typeof x==='string'?x:'No pude leer ese archivo. Revisa que sea una planilla .xlsx.')}}
+$('fi').onchange=e=>files([...e.target.files]);$('f2').onchange=e=>files([...e.target.files]);
+['lb','lb2'].forEach(k=>$(k).onkeydown=e=>{if(e.key==='Enter')$(k==='lb'?'fi':'f2').click()});
+[1,2,3,4].forEach(i=>$('t'+i).onclick=()=>tab(i));
+$('demo').onclick=()=>{if(has()&&!confirm('Hay un guardado en este navegador. Los ejemplos no lo borrarán, pero reemplazarán lo que ves ahora. ¿Continuar?'))return;const g=(k,a)=>({k,g:a});
+  S=[['Valentina Araya','1°A','TL','Ana Pérez','T',[g('NL',[4.0,3.5,5.0,4.2]),g('L',[6.0,6.5,7.0,6.2])],[[20,17],[21,19],[18,17]],1,{t:'Integral',ob:'Psicometría',co:'FONO - PSICOPEDAGOGICO - FAMILIA',eg:''}],
+     ['Matías Fuentes','1°B','TDAH','Luis Díaz','T',[g('L',[6.5,6.0,7.0,6.8]),g('LD',[7.0,6.5,6.8,7.0])],[[20,19],[21,20]],0,{t:'FUR y avance',ob:'',co:'',eg:''}],
+     ['Sofía Navarro','2°B','TEA','Ana Pérez','P',[g('ML',[5.0,4.5,5.2,4.8]),g('NL',[3.0,4.0,3.5,5.0])],[[20,9],[21,12],[18,10]],1,{t:'Integral',ob:'Posible alta',co:'FUR EGRESO',eg:'posible egreso'}],
+     ['Benjamín Cortés','3°A','DEA','Luis Díaz','T',[g('L',[6.0,5.5,6.2,6.0]),g('L',[5.5,6.0,5.8,6.4])],[[20,18],[21,20]],0,null]]
+   .map(d=>({n:d[0],c:d[1],dx:d[2],rp:d[3],tp:d[4],rut:'11.111.111-1',fn:'12-03-2018',fe:'05-04-2025',vm:'05-04-2025',ret:false,rv:d[8]||undefined,
+     sem:[{L:d[5][0],M:d[5][1],al:!!d[7],sub:[false,!!d[7],false],ob:''},E()],att:d[6].map((x,i)=>({m:['Marzo','Abril','Mayo'][i],d:x[0],a:x[1]}))}));
+  calc(S);start();$('ld').textContent='Datos de ejemplo ficticios. Puedes probar la edición y el guardado.';};
+$('q').oninput=e=>{st.q=e.target.value;draw()};
+['lt','md','pf'].forEach(k=>$(k).onchange=e=>{st[k]=e.target.value;draw()});
+$('lv').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;st.lv=b.dataset.l;$('lv').querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));draw()};
+$('ls').onclick=e=>{const b=e.target.closest('.st');if(b)open(+b.dataset.i)};
+$('ov').onclick=e=>{if(e.target===$('ov')||e.target.id==='cl')close()};
+$('lockBtn').onclick=()=>{if(dirty&&!confirm('Hay cambios sin guardar. ¿Cerrar la sesión igualmente?'))return;NS=NM=NE=NR=null;S=[];clearDirty();$('app').classList.add('hid');$('start').classList.remove('hid');$('pw').value='';$('pw0').value='';refreshSaved();window.scrollTo(0,0);};
+ $('gd').onclick=guardar;$('op').onclick=abrir;$('rm').onclick=borrar;$('rm0').onclick=borrar;
+refreshSaved();
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
+document.onkeydown=e=>{if(e.key==='Escape')close()};
+</script>
+</body>
+</html>
