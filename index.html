@@ -201,13 +201,13 @@ function open(i){const s=S[i];
   <p class="mt">Edita las notas por semestre y asignatura (N1–N4) y los días de asistencia. Los cambios se guardan en memoria hasta que pulses «Guardar» con tu clave.</p>
   <div id="editPanel"></div>
   <button class="btn" id="cl" style="width:100%;margin-top:18px">Cerrar</button>`;
-  $('ov').classList.add('on');$('cl').focus();}
+  $('ov').classList.add('on');renderEdit(i);$('cl').focus();}
 function summary(){const A=S.filter(s=>!s.ret),dx=s=>s.dx||'—',N=f=>A.filter(f).length;
   const D=[...new Set(A.map(dx))].sort(),C=[...new Set(A.map(s=>s.c))];
   const sg=D.filter(d=>SG[d]).map(d=>d+': '+SG[d]).join('. ');
   $('v2').innerHTML=`<p class="ct">${A.length} estudiantes · ${N(s=>s.tp==='T')} transitorios · ${N(s=>s.tp==='P')} permanentes${N(s=>!s.tp)?' · '+N(s=>!s.tp)+' sin tipo':''}${N(s=>s.rv)?'<br>Reevaluación 2026: '+N(s=>s.rv&&s.rv.t==='Integral')+' integrales · '+N(s=>s.rv&&s.rv.t!=='Integral')+' en proceso · '+N(s=>eg(s))+' con posible egreso':''}</p><div class="sm"><table><tr><th>Curso</th>${D.map(d=>`<th title="${SG[d]||''}">${d}</th>`).join('')}<th>Total</th></tr>${C.map(c=>`<tr><td>${c}</td>${D.map(d=>`<td>${N(s=>s.c===c&&dx(s)===d)||''}</td>`).join('')}<td><b>${N(s=>s.c===c)}</b></td></tr>`).join('')}<tr><td><b>Total</b></td>${D.map(d=>`<td><b>${N(s=>dx(s)===d)}</b></td>`).join('')}<td><b>${A.length}</b></td></tr></table></div><p class="note">${sg}${sg?'.':''} No se cuentan los estudiantes retirados.</p>`;}
 
-const safeText = v => String(v??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','&#39;':'&#39;'}[c]));
+const safeText = v => String(v??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function renderEdit(i){
  const s=S[i], field=(label,key,value,type='number',step='1')=>`<label style="display:block;margin:8px 0">${label}<input style="width:100%" type="${type}" step="${step}" data-key="${key}" value="${safeText(value)}"></label>`;
  let html='';
@@ -239,7 +239,7 @@ function renderEdit(i){
   // Keep edited data as the canonical source for rebuilding after adding planillas.
   const source=NS&&NS.find(x=>x.n===s.n&&x.c===s.c);
   if(source){source.sem=structuredClone(s.sem);source.att=structuredClone(s.att);}
-  calc(S);draw();open(i);$('editMsg').textContent='Cambios aplicados. Abre «Guardar en este dispositivo» y pulsa Guardar para conservarlos.';
+  calc(S);draw();open(i);$('editMsg').textContent='Cambios aplicados. Guarda desde el panel principal para conservarlos.';
  };
 }
 
@@ -295,7 +295,7 @@ $('demo').onclick=()=>{const g=(k,a)=>({k,g:a});
      ['Benjamín Cortés','3°A','DEA','Luis Díaz','T',[g('L',[6.0,5.5,6.2,6.0]),g('L',[5.5,6.0,5.8,6.4])],[[20,18],[21,20]],0,null]]
    .map(d=>({n:d[0],c:d[1],dx:d[2],rp:d[3],tp:d[4],rut:'11.111.111-1',fn:'12-03-2018',fe:'05-04-2025',vm:'05-04-2025',ret:false,rv:d[8]||undefined,
      sem:[{L:d[5][0],M:d[5][1],al:!!d[7],sub:[false,!!d[7],false],ob:''},E()],att:d[6].map((x,i)=>({m:['Marzo','Abril','Mayo'][i],d:x[0],a:x[1]}))}));
-  calc(S);start();$('sv').classList.add('hid');$('ld').textContent='Datos de ejemplo ficticios.';};
+  calc(S);start();$('ld').textContent='Datos de ejemplo ficticios. Puedes probar la edición y el guardado.';};
 $('q').oninput=e=>{st.q=e.target.value;draw()};
 ['lt','md','pf'].forEach(k=>$(k).onchange=e=>{st[k]=e.target.value;draw()});
 $('lv').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;st.lv=b.dataset.l;$('lv').querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));draw()};
